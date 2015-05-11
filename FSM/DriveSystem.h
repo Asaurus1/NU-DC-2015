@@ -1,3 +1,7 @@
+#ifndef DRIVESYSTEM_H
+#define DRIVESYSTEM_H
+#include <Arduino.h>
+
 namespace DriveSystem
 {
   // Drive/Turn directions
@@ -78,48 +82,6 @@ namespace DriveSystem
     runMotor(motorL,motorL.dir,motorL.speed);
   }
 }
-
-void setup() {
-  // Initialize drive pins
-  pinMode(MOTOR_L_DIR,OUTPUT);
-  pinMode(MOTOR_R_DIR,OUTPUT);
-  
-  // Create Serial Link
-  Serial.begin(115200);
-}
-
-void loop() {
-  if (Serial.available())
-  {
-     char cmd[5];
-     if (!Serial.readBytes(cmd,2))
-     {
-        Serial.print("Invalid Command");
-     }
-     else
-     {
-       byte spd = (constrain(cmd[1],'0','9')-'0')*25;
-       
-       switch(cmd[0])
-       {
-         case 'f':
-            moveForward(spd);
-            break;
-         case 'b':
-            moveReverse(spd);
-            break;
-         case 'L':
-            moveTurnLeft(spd);
-            break;
-         case 'R':
-            moveTurnRight(spd);
-            break;
-          default:
-            Serial.print("I don't understand that command");
-            break;
-       }
-     }
-  }     
-}
+#endif
 
 
