@@ -6,10 +6,10 @@
 
 using namespace DriveSystem;
 
-#define GAME_END_TIME (3 * 60 * 1000)
-#define GAME_ALMOST_OVER_TIME	(GAME_END_TIME - 30 * 1000)
 #define TURN_TIME_90 2500
 #define MOVE_TIME_1B 2500
+int GAME_END_TIME = (3 * 60 * 1000);
+int GAME_ALMOST_OVER_TIME = (GAME_END_TIME - 30 * 1000);
 
 //Now create a structure to hold all data about the game state space
 namespace st
@@ -27,7 +27,7 @@ namespace st
 	byte x = 0;
 	byte y = 0;
 	byte dir = 0; // 0 = x, 1 = y;
-        byte spd = 255;
+  byte spd = 255;
 
 	//bump counters
 	int bumps = 0;
@@ -74,6 +74,7 @@ namespace FSM {
 		void s_shake_fb();
 		void s_gameEnd();
     void s_Done();
+    void s_InitialSequence();
 		void FSM_step();
 		void next();
 		void check_events();
@@ -81,7 +82,7 @@ namespace FSM {
 		//Action and interrupt queues
 		//ActionQueue<(void *), 20> Actions;
 		//ActionQueue<(void *), 10> Interrupts;
-
+                
 		// State Timers
 	  unsigned long previous_millis;
 	  inline long state_time() { return millis() - previous_millis; };
@@ -114,17 +115,35 @@ namespace FSM {
 	  //Special Init Function
 		void s_init()
 	  {
+	  	Serial.print("HERE");
+      const int tolerance = 80;
       st::team_color = digitalRead(TEAMSWITCH_PIN);
       int val = analogRead(COLORSENSE_PIN);
       if (st::team_color == WHITE) //White, thus we're on purple
         {
-          st::color_threshold=val+100;
+          st::color_threshold=val+tolerance;
         }
       else
         {
-          st::color_threshold=val-100;
+          st::color_threshold=val-tolerance;
         }
-		  next_state = s_run;
+      // Wait to start  
+      digitalWrite(LED_PIN, HIGH);
+      while(!digitalRead(STARTBUTTON_PIN))
+      {
+        Serial.print("HERE Again");
+      }
+
+      // Set the official game clock:
+      int start_time = millis();
+      GAME_END_TIME +=start_time;
+      GAME_ALMOST_OVER_TIME +=start_time;
+      
+      // drop the scoop
+      scoopDown();
+      
+      digitalWrite(LED_PIN, LOW);
+		  next_state = s_InitialSequence;
 		  next();
 		}
 
@@ -136,11 +155,11 @@ namespace FSM {
 				case 0: {// Move forward
 					scoopDown();
 					moveForward(255);
-					startColorCount();
+					startBumpCount();
 					current_step++;
 					break; }
 				case 1: {// Stop after two squares
-					if (1)//(colorCount() >= 2 && st::current_square_color != st::team_color) // %% color sensor reads ~team_color
+					if ((bumpCount() >= 2) && st::current_square_color != st::team_color) // %% color sensor reads ~team_color
 					{
 						st::y = 2;
 						st::x = 0;
@@ -157,11 +176,11 @@ namespace FSM {
 						scoopDown();
 						delay(100);
 						moveForward(st::spd);
-						startColorCount();
+						startBumpCount();
 						current_step++;
 					} break; }
 				case 3: {
-					if (true) //(colorCount() >= 2) && (st::current_square_color != st::team_color)) // %% color sensor reads ~team_color
+					if ((bumpCount() >= 2) && (st::current_square_color != st::team_color)) // %% color sensor reads ~team_color
 					{
 						st::y = 2;
 						st::x = 2;
@@ -177,11 +196,11 @@ namespace FSM {
 						scoopDown();
 						delay(100);
 						moveForward(st::spd);
-						startColorCount();
+						startBumpCount();
 						current_step++;
 					} break; }
 				case 5: {
-					if (colorCount() >= 2 && st::current_square_color != st::team_color) // %% color sensor reads ~team_color
+					if (bumpCount() >= 2 && st::current_square_color != st::team_color) // %% color sensor reads ~team_color
 					{
 						st::y = 0;
 						st::x = 2;
@@ -197,11 +216,11 @@ namespace FSM {
 						scoopDown();
 						delay(100);
 						moveForward(st::spd);
-						startColorCount();
+						startBumpCount();
 						current_step++;
 					} break; }
 				case 7: {
-					if (colorCount() >= 2 && st::current_square_color != st::team_color) // %% color sensor reads ~team_color
+					if (bumpCount() >= 2 && st::current_square_color != st::team_color) // %% color sensor reads ~team_color
 					{
 						st::y = 0;
 						st::x = 4;
@@ -216,14 +235,34 @@ namespace FSM {
 
 		void s_run()
 		{
-	    moveForward1Block();
-	      
-//			moveForward(sin(state_time()/(0.01)));
-//			if (state_time() > 50000)
-//			{
-//				next_state = s_action1; //Actions.push(s_action1);
-//				next();
-//			}
+		    moveForward(255);
+		    delay(6000);
+		    moveBrake();
+		    ScoopDump();
+		    delay(5000);
+		    next_state = s_gameEnd;
+		    next();
+				// TEST CODE
+				//  moveTurnRight(255);
+				//  delay(200);
+				//  while(!digitalRead(STARTBUTTON_PIN))
+				//  {;}
+				//  delay(200);
+				//  moveBrake();
+				//  while(!digitalRead(STARTBUTTON_PIN))
+				//  {;}
+				//  moveTurnLeft(255);
+				//  delay(200);
+				//  while(!digitalRead(STARTBUTTON_PIN))
+				//  {;}
+				//   next_state=s_run;
+				//   next();
+				//			moveForward(sin(state_time()/(0.01)));
+				//			if (state_time() > 50000)
+				//			{
+				//				next_state = s_action1; //Actions.push(s_action1);
+				//				next();
+				//			}
 		}
 
 		/*void s_action1()
@@ -313,6 +352,12 @@ namespace FSM {
       		st::colorchanges++;
     	}
 
+    	tableBump.poll();
+    	if (tableBump.pressed())
+    	{
+    		st::bumps++;
+    	}
+
          
 		  /* Game Timers */
 		  if (game_time() > GAME_END_TIME)
@@ -322,6 +367,7 @@ namespace FSM {
 		  }
 		  else if (game_time() > GAME_ALMOST_OVER_TIME)
 		  {
+		  	digitalWrite(LED_PIN, HIGH);
 		  	next_state = s_gameEnd; //Search for a place to drop
 		  	next();  
       }
@@ -336,13 +382,13 @@ using namespace FSM;
 
 void setup()
 {
+	digitalWrite(LED_PIN,LOW);
+  digitalWrite(1, HIGH);
   Serial.begin(9600);
   ServoSensorSetup();
   FSM::next_state = FSM::s_init;
   FSM::next();
-
 }
-int running = 0;
 
 void loop() // Main FSM Loop
 {

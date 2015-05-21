@@ -11,6 +11,10 @@
 #define SCOOPSERVO_PIN 8
 #define DROPSERVO_PIN 13
 #define LED_PIN 14
+#define STARTBUTTON_PIN 12
+#define BUMPSENSOR_PIN 17
+#define SCOOPSERVO_PIN 2
+#define BRUSHMOTORS_PIN 1
 
 // Define some colors, just for the hell of it
 #define WHITE 0
@@ -18,7 +22,7 @@
 #define BLACK 2
 
 //Peripherals
-BumpSensor tableBump(5);
+BumpSensor tableBump(BUMPSENSOR_PIN);
 Servo SweepServo;
 Servo ScoopServo;
 Servo DropServo;
@@ -26,7 +30,7 @@ Servo DropServo;
 void scoopDown() 
 {
   ScoopServo.write(13);
-  delay(1000);
+  delay(2000);
   ScoopServo.detach();
 }
 
@@ -34,7 +38,7 @@ void scoopUp()
 {
   ScoopServo.attach(SCOOPSERVO_PIN);
   ScoopServo.write(160);
-  delay(1000);
+  delay(2000);
 }
 
 void ServoSensorSetup()
@@ -43,6 +47,37 @@ void ServoSensorSetup()
   SweepServo.attach(3);
   pinMode(LED_PIN, OUTPUT);
   pinMode(TEAMSWITCH_PIN, INPUT);
+  pinMode(STARTBUTTON_PIN, INPUT);
+  pinMode(BRUSHMOTORS_PIN, OUTPUT);
+  pinMode(BUMPSENSOR_PIN, INPUT);
+}
+
+void ScoopServoWrite(int angle)
+{
+  ScoopServo.attach(SCOOPSERVO_PIN);
+  ScoopServo.write(angle);
+}
+
+void ScoopDump()
+{
+  ScoopServo.attach(SCOOPSERVO_PIN);
+  ScoopServo.write(0);
+  delay(3000);
+  ScoopServo.write(180);
+  delay(200);
+  ScoopServo.detach();
+}
+
+void ScoopServoOff()
+{
+  ScoopServo.detach();
+}
+
+inline int ReadStartButton()
+{
+  int val=digitalRead(STARTBUTTON_PIN);
+  return val;
+  
 }
 
 int ReadColor(int ColorThresh)
