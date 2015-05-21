@@ -79,18 +79,23 @@ inline int ReadStartButton()
   
 }
 
+int CSA[COLOR_SENSOR_ARRAY_SIZE];
+int CSAIndex = 0;
+int CSAvg = 60;
+
 int ReadColor(int ColorThresh)
 {
   int color;
   int val = analogRead(COLORSENSE_PIN);
-  if (val>ColorThresh){
-    color = WHITE; // white
-  }
-  else {
-    color = 1; //purple
-  }
-  return color;
-  
+
+  CSAvg -= CSA[CSAIndex]/COLOR_SENSOR_ARRAY_SIZE;
+  CSAvg += val/COLOR_SENSOR_ARRAY_SIZE;
+  CSAIndex = (CSAIndex + 1) % COLOR_SENSOR_ARRAY_SIZE;
+
+  if (CSAvg > COlorThresh)
+    return WHITE;
+  else
+    return PURPLE;  
 }
 
 #endif
