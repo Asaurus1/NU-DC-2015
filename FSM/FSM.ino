@@ -78,6 +78,10 @@ namespace FSM {
 		void FSM_step();
 		void next();
 		void check_events();
+		void customDelay(int ms);
+		void waitForBumps(int count);
+		void waitForColor(int color);
+		void waitForColorCount(int count);
 
 		//Action and interrupt queues
 		//ActionQueue<(void *), 20> Actions;
@@ -338,6 +342,41 @@ namespace FSM {
     }
 
 		/********************* FSM Events *********************/
+		void customDelay(int ms)
+		{
+			 unsigned long start = millis();
+			 while (millis() < start + ms)
+			 {
+			 		check_events();
+			 }
+		}
+
+		void waitForColor(int color)
+		{
+			 while (st::current_square_color != color)
+			 {
+			 		check_events();
+			 }
+		}
+
+		void waitForColorCount(int count)
+		{
+			 startColorCount();
+			 while (colorCount() < count)
+			 {
+			 		check_events();
+			 }
+		}
+
+		void waitForBumpCount(int count)
+		{
+			 startBumpCount();
+			 while (bumpCount() < count)
+			 {
+			 		check_events();
+			 }
+		}
+
 		void check_events()
 		{
       //polling to show color:
@@ -382,10 +421,12 @@ using namespace FSM;
 
 void setup()
 {
+	ServoSensorSetup();
 	digitalWrite(LED_PIN,LOW);
   digitalWrite(1, HIGH);
   Serial.begin(9600);
-  ServoSensorSetup();
+  delay(1000);
+  Serial.print("BEGIN");
   FSM::next_state = FSM::s_init;
   FSM::next();
 }
