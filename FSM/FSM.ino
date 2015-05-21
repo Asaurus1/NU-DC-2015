@@ -190,6 +190,8 @@ namespace FSM {
                     delay(250);
                     moveBrake();
                     delay(250);
+                    ScoopServo.attach(2);
+                    ScoopServoWrite(40);
                     DropServo.attach(13);
                     DropServo.write(180);
                     delay(200);
@@ -197,6 +199,7 @@ namespace FSM {
                     moveForward(100);
                     delay(2000);
                     moveBrake();
+                    ScoopServo.detach();
                     
                     next_state=s_Done;
                     next();

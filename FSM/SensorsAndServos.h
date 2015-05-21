@@ -43,7 +43,7 @@ void ScoopDump()
 {
   ScoopServo.attach(SCOOPSERVO_PIN);
   ScoopServo.write(0);
-  delay(3000);
+  delay(2500);
   ScoopServo.write(180);
   delay(200);
   ScoopServo.detach();
