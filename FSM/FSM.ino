@@ -1,10 +1,68 @@
 #include "DriveSystem.h"
 //#include "ActionQueue.h" // Was planning on implementing queues, but that might not work easily in the time we have.
+#include "BumpSensor.h"
 
 using namespace DriveSystem;
 
 #define GAME_END_TIME (3 * 60 * 1000)
 #define GAME_ALMOST_OVER_TIME	(GAME_END_TIME - 30 * 1000)
+
+//Peripherals
+BumpSensor tableBump(5);
+#define sweepSensor 4
+
+//Servos
+Servo sweepServo(8);
+Servo scoopServo(15);
+Servo dropBoxServo(13);
+
+// Define some colors, just for the hell of it
+#define WHITE 1
+#define PURPLE 0
+#define BLACK 2
+
+//Now create a structure to hold all data about the game state space
+struct {
+	byte team_color; 						// Holds the color of the team that I am on when I start
+	byte current_square_color; 	// Holds the color of the current square
+
+	bool box_full; 							// Holds whether the box is full
+	bool box_dropped;						// Holds whether the box has already been dropped.
+
+	//coordinates (if they work)
+	byte x;
+	byte y;
+
+	//bump counters
+	int bumps;
+	int previous_bumps;
+
+	// Timer counter
+	unsigned long timer_prev;
+	
+} game_state;
+
+// Some functions to make mirroring easy
+inline void moveTurnLeftAsPurple(byte spd) { 
+	if (game_state.team_color == PURPLE) 
+		moveTurnLeft(spd);
+	else
+		moveTurnRight(spd);
+}
+inline void moveTurnRightAsPurple(byte spd) { 
+	if (game_state.team_color == PURPLE) 
+		moveTurnRight(spd);
+	else
+		moveTurnLeft(spd);
+}
+
+// Functions for bump sensing
+inline void startBumpCount() { game_state.previous_bumps = game_state.bumps; }
+inline int  bumpCount()	{ return game_state.bumps-game_state.previous_bumps; }
+
+// Functions for timing
+inline void startTimerDelay() { game_state.timer_prev = millis() }
+inline unsigned long timerDelay() { return millis() - game_state.timer_prev; }
 
 namespace FSM {
 		void s_init();
@@ -29,12 +87,27 @@ namespace FSM {
 		void (*previous_state)() = 0;
 		void (*current_state)() = 0;
 		void (*next_state)() = 0;
+		bool state_init = 0;
+
+		//Create a task array to hold a sequence of actions
+		void (*tasks[10])() = {};
+		int current_step = 0;
 
 		void next()
 		{
 			previous_state = current_state;
 			current_state = next_state;
 			previous_millis = millis();
+		}
+
+		void next_task()
+		{
+			if (current_tasks < 9)
+			{
+				current_task++;
+				return true;
+			}
+			else return false;
 		}
 
 		inline void FSM_step()
@@ -51,6 +124,36 @@ namespace FSM {
 			// Do some stuff here
 			next_state = s_run;
 			next();
+		}
+
+		void s_InitialSequence()
+		{
+			switch(current_step)
+			{
+				case 0: // Move forward
+					moveForward();
+					startBumpCount();
+					current_step++;
+					break;
+				case 1: // Stop after two bumps
+					if (bumpCount() >= 2) // %% color sensor reads ~team_color
+					{
+						y = 2;
+						x = 0;
+						moveTurnLeft(spd);
+						startTimerDelay();
+						current_step++;
+					}
+					break;
+				case 2: // Stop turning left and put the scoop down.
+					if (timerDelay() >= 1000)
+					{
+						moveBrake();
+						// Put scoop down here
+						delay(100);
+						startBumpCount();
+					}
+			}
 		}
 
 		void s_run()
