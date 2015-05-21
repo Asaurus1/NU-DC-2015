@@ -4,9 +4,8 @@
 //#include "ActionQueue.h" // Was planning on implementing queues, but that might not work easily in the time we have.
 
 using namespace DriveSystem;
-
-#define GAME_END_TIME (3 * 60 * 1000)
-#define GAME_ALMOST_OVER_TIME	(GAME_END_TIME - 30 * 1000)
+int GAME_END_TIME = (3 * 60 * 1000);
+int GAME_ALMOST_OVER_TIME = (GAME_END_TIME - 30 * 1000);
 
 //Global Vars:
 int Our_Color; //(0=White, 1=Purple; I couldn't get an enum working
@@ -26,7 +25,7 @@ namespace FSM {
 		//Action and interrupt queues
 		//ActionQueue<(void *), 20> Actions;
 		//ActionQueue<(void *), 10> Interrupts;
-
+                
 		// State Timers
 	  unsigned long previous_millis;
 	  inline long state_time() { return millis() - previous_millis; };
@@ -55,28 +54,80 @@ namespace FSM {
 	  //Special Init Function
 		void s_init()
                 {
+                      digitalWrite(BRUSHMOTORS_PIN, HIGH);
+                      const int tolerance = 80;
                       Our_Color = digitalRead(TEAMSWITCH_PIN);
                       int val = analogRead(COLORSENSE_PIN);
                       if (Our_Color==0) //White, thus we're on purple
                         {
-                          Global_Color_Thresh=val+100;
+                          Global_Color_Thresh=val+tolerance;
                         }
                       else
                         {
-                          Global_Color_Thresh=val-100;
+                          Global_Color_Thresh=val-tolerance;
                         }
                       
-	              next_state = s_run;
+                      digitalWrite(LED_PIN,HIGH);
+                      while(!digitalRead(STARTBUTTON_PIN))
+                      {
+                        ;
+                      }
+                      // Set the official game clock:
+                      int start_time = millis();
+                      GAME_END_TIME +=start_time;
+                      GAME_ALMOST_OVER_TIME +=start_time;
+                      
+                      // drop the scoop
+                      ScoopServo.attach(2);
+                      ScoopServo.write(180);
+                      delay(1000);
+                      ScoopServo.detach();
+                      
+                      // start the brushes running
+                      pinMode(1, OUTPUT);
+                      digitalWrite(1, LOW);
+                      
+                      digitalWrite(LED_PIN, LOW);
+                      
+	              next_state = s_Done;
 		      next();
 		}
 
 		void s_run()
 		{
-                    moveForward1Block();
-                    delay(10000);
-                      
-                     next_state=s_run;
-                     next();
+                      moveForward(255);
+                      delay(6000);
+                      moveBrake();
+                      ScoopDump();
+                      delay(5000);
+                      next_state = s_gameEnd;
+                      next();
+  
+//                      ScoopDump();
+//                      while(!digitalRead(STARTBUTTON_PIN))
+//                      {
+//                        ;
+//                      }
+//                      next_state = s_run;
+//                      next();
+
+                      // TEST CODE
+//                    moveTurnRight(255);
+//                    delay(200);
+//                    while(!digitalRead(STARTBUTTON_PIN))
+//                    {;}
+//                    delay(200);
+//                    moveBrake();
+//                    while(!digitalRead(STARTBUTTON_PIN))
+//                    {;}
+//                    moveTurnLeft(255);
+//                    delay(200);
+//                    while(!digitalRead(STARTBUTTON_PIN))
+//                    {;}
+//                     next_state=s_run;
+//                     next();
+
+
 //			moveForward(sin(state_time()/(0.01)));
 //			if (state_time() > 50000)
 //			{
@@ -174,6 +225,7 @@ namespace FSM {
       		  }
       		  else if (game_time() > GAME_ALMOST_OVER_TIME)
       		  {
+                        digitalWrite(LED_PIN, HIGH);
       		  	next_state = s_gameEnd; //Search for a place to drop
       		  	next();  
                   }
@@ -188,6 +240,8 @@ using namespace FSM;
 
 void setup()
 {
+        digitalWrite(LED_PIN,LOW);
+        digitalWrite(1, HIGH);
         ServoSensorSetup();
   	FSM::next_state = FSM::s_init;
 	FSM::next();

@@ -9,9 +9,13 @@
 #define SWEEPSERVO_PIN 3
 #define DROPWERVO_PIN 13
 #define LED_PIN 14
+#define STARTBUTTON_PIN 12
+#define SCOOPSERVO_PIN 2
+#define BRUSHMOTORS_PIN 1
 
 Servo SweepServo;
 Servo DropServo;
+Servo ScoopServo;
 
 //namespace ServosAndSensors
 //{
@@ -25,6 +29,36 @@ void ServoSensorSetup()
   SweepServo.attach(3);
   pinMode(LED_PIN, OUTPUT);
   pinMode(TEAMSWITCH_PIN, INPUT);
+  pinMode(STARTBUTTON_PIN, INPUT);
+  pinMode(BRUSHMOTORS_PIN, OUTPUT);
+}
+
+void ScoopServoWrite(int angle)
+{
+  ScoopServo.attach(SCOOPSERVO_PIN);
+  ScoopServo.write(angle);
+}
+
+void ScoopDump()
+{
+  ScoopServo.attach(SCOOPSERVO_PIN);
+  ScoopServo.write(0);
+  delay(3000);
+  ScoopServo.write(180);
+  delay(200);
+  ScoopServo.detach();
+}
+
+void ScoopServoOff()
+{
+  ScoopServo.detach();
+}
+
+inline int ReadStartButton()
+{
+  int val=digitalRead(STARTBUTTON_PIN);
+  return val;
+  
 }
 
 int ReadColor(int ColorThresh)
