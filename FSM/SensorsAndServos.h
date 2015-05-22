@@ -82,8 +82,7 @@ int ReadColor(int ColorThresh)
   int color;
   int val = analogRead(COLORSENSE_PIN);
 
-  CSAvg -= CSA[CSAIndex]/COLOR_SENSOR_ARRAY_SIZE;
-  CSAvg += val/COLOR_SENSOR_ARRAY_SIZE;
+  CSAvg += (val-CSA[CSAIndex])/COLOR_SENSOR_ARRAY_SIZE;
   CSA[CSAIndex] = val;
   CSAIndex = (CSAIndex + 1) % COLOR_SENSOR_ARRAY_SIZE;
 

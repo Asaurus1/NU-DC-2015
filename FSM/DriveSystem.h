@@ -5,6 +5,8 @@
 
 using namespace FSM;
 
+int TURN_TIME_180 = 1050;
+
 namespace DriveSystem
 {
   // Drive/Turn directions
@@ -105,46 +107,33 @@ namespace DriveSystem
       moveTurnLeft(st::spd);
   }
 
-  void moveTurnRight90AsPurple()
+  void moveTurnRightAsPurple(float deg)
   {
      moveTurnRightAsPurple();
-     waitTime(1050/2);
+     waitTime((deg / 180.0) * TURN_TIME_180);
      moveBrake();
   }
-  void moveTurnLeft90AsPurple()
+  void moveTurnLeftAsPurple(float deg)
   {
     moveTurnLeftAsPurple();
-    waitTime(1050/2);
+    waitTime((deg / 180.0) * TURN_TIME_180);
     moveBrake();
   }
 
   //Move forward block backwards by squares
-  void moveForward1Block()
-  {
-    moveForward(st::spd);
-    waitBumps(1);
-    waitTime(500);
-    moveBrake();
-  }
 
   void moveForwardNBlocks(int n)
   {
-    while (n-- > 0)
-      moveForward1Block();
-  }
-
-  void moveForwardNBlocks_continuous(int n)
-  {
     moveForward(st::spd);
-    waitBumps(n);
+    waitColorCount(n);
     waitTime(500);
     moveBrake();
   }
 
-  void moveReverse1Block()
+  void moveReverseNBlocks(int n)
   {
     moveReverse(st::spd);
-    waitBumps(1);
+    waitColorCount(n);
     waitTime(500);
     moveBrake();
   }

@@ -1,3 +1,4 @@
+		    //ScoopDump();
 #include "DriveSystem.h"
 #include "SensorsAndServos.h"
 #include <Servo.h>
@@ -8,7 +9,7 @@ using namespace DriveSystem;
 
 #define TURN_TIME_90 2500
 #define MOVE_TIME_1B 2500
-#define COLOR_READ_INT 100
+#define COLOR_READ_INT 50
 #define DEBUG_INT			 1000
 int GAME_END_TIME = (3 * 60 * 1000);
 int GAME_ALMOST_OVER_TIME = (GAME_END_TIME - 30 * 1000);
@@ -57,14 +58,46 @@ namespace FSM {
 
 		void s_run()
 		{
-		    moveForwardNBlocks(4);
+		    /*moveForwardNBlocks(4);
 		    moveTurnLeft90AsPurple();
 		    moveTurnLeft90AsPurple();
-		    moveForwardNBlocks_continuous(4);
-		    //ScoopDump();
+		    moveForwardNBlocks_continuous(4);*/
+
+		    // Step 1
+		   	moveForwardNBlocks(3);
+		   	scoopUp();
+		   	moveTurnRightAsPurple(90);
+		   	scoopDown();
+		   	moveReverse(255); // straighten on wall
+		   	waitTime(500);
+
+		   	// Step 2
+		   	moveForwardNBlocks(3);
+
+		   	//Step 3
+		   	scoopUp();
+		   	moveTurnRightAsPurple(90);
+		   	scoopDown();
+		   	moveReverse(255); //straighten on wall
+		   	waitTime(500); 
+		   	moveForwardNBlocks(1);
+		   	moveTurnRightAsPurple(90);
+		   	moveForwardNBlocks(1);
+		   	scoopUp();
+		   	moveTurnLeftAsPurple(90);
+		   	scoopDown();
+
+		   	// Step 4
+		   	moveForwardNBlocks(2);
+		   	ScoopDump();
+
+		   	// Step 5
+		   	moveForwardNBlocks(2);
+
+		   	// Finally
 		    digitalWrite(LED_PIN,LOW);
 		    //waitTime(5000);
-		    next_state = s_done;
+		    next_state = s_gameEnd;
 		    next();
 		}
 
@@ -73,7 +106,6 @@ namespace FSM {
 	    //Check color. If it's not our team color, advance one square and check again
 	    moveForward(255);
 	    waitColor(st::team_color);
-	   	moveForward(255);
       waitTime(500);
       moveBrake();
 
@@ -90,6 +122,7 @@ namespace FSM {
       next_state=s_done;
       next();
 		}
+
     void s_done() // also functions as a color-sensing loop, if you just need to check colors
     {
       moveBrake();
@@ -99,7 +132,7 @@ namespace FSM {
 		void waitTime(int ms)
 		{
 			 unsigned long start = millis();
-			 while (millis() < start + ms)
+			 while (millis() <= start + ms)
 			 {
 			 		check_events();
 			 }
@@ -116,7 +149,7 @@ namespace FSM {
 		void waitColorCount(int count)
 		{
 			 startColorCount();
-			 while (colorCount() < count)
+			 while (colorCount() <= count)
 			 {
 			 		check_events();
 			 }
@@ -125,7 +158,7 @@ namespace FSM {
 		void waitBumps(int count)
 		{
 			 startBumpCount();
-			 while (bumpCount() < count)
+			 while (bumpCount() <= count)
 			 {
 			 		check_events();
 			 }
