@@ -58,8 +58,7 @@ namespace FSM
 	void s_action1();
 	void s_shake_fb();
 	void s_gameEnd();
-  void s_Done();
-  void s_InitialSequence();
+  void s_done();
 	void FSM_step();
 	void next();
 	void check_events();

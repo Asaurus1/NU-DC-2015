@@ -55,27 +55,15 @@ namespace FSM {
 		  next();
 		}
 
-		void s_InitialSequence()
-		{
-			Serial.print("IS: ");
-		}
-
 		void s_run()
 		{
 		    moveForward(st::spd);
-		    waitColorCount(1);
-		    digitalWrite(LED_PIN,LOW);
-		    waitColorCount(1);
-		    digitalWrite(LED_PIN,HIGH);
-		    waitColorCount(1);
-		    digitalWrite(LED_PIN,LOW);
-		    waitColorCount(1);
-		    digitalWrite(LED_PIN,HIGH);
+		    waitBumps(4);
 		    moveBrake();
-		    ScoopDump();
+		    //ScoopDump();
 		    digitalWrite(LED_PIN,LOW);
-		    waitTime(5000);
-		    next_state = s_Done;
+		    //waitTime(5000);
+		    next_state = s_done;
 		    next();
 		}
 
@@ -83,39 +71,25 @@ namespace FSM {
     {
 	    //Check color. If it's not our team color, advance one square and check again
 	    moveForward(255);
-	    int flag = 0;
-	    if (st::current_square_color = st::team_color)
-	    {
-	    	flag = 1;
-	    }
+	    waitColor(st::team_color);
+	   	moveForward(255);
+      waitTime(500);
+      moveBrake();
 
-	    if(flag)
-	    {
-	      moveForward(255);
-	      waitTime(500);
-	      moveBrake();
+      //drop the back
+      waitTime(250);
+      DropServo.attach(13);
+      DropServo.write(180);
+      waitTime(200);
+      DropServo.detach();
+      moveForward(100);
+      waitTime(2000);
+      moveBrake();
 
-	      //drop the back
-
-	      moveTurnLeft(255);
-	      waitTime(250);
-	      moveTurnRight(255);
-	      waitTime(250);
-	      moveBrake();
-	      waitTime(250);
-	      DropServo.attach(13);
-	      DropServo.write(180);
-	      waitTime(200);
-	      DropServo.detach();
-	      moveForward(100);
-	      waitTime(2000);
-	      moveBrake();
-	      
-	      next_state=s_Done;
-	      next();
-	   	}
+      next_state=s_done;
+      next();
 		}
-    void s_Done() // also functions as a color-sensing loop, if you just need to check colors
+    void s_done() // also functions as a color-sensing loop, if you just need to check colors
     {
       moveBrake();
     }
@@ -182,11 +156,11 @@ namespace FSM {
     	{
     		st::bumps++;
     	}
-    	
+
 		  /* Game Timers */
 		  if (game_time() > GAME_END_TIME)
 		  {
-       next_state = s_Done; // do nothing
+       next_state = s_done; // do nothing
        //next();
 		  }
 		  else if (game_time() > GAME_ALMOST_OVER_TIME)
@@ -225,7 +199,7 @@ void setup()
 	ServoSensorSetup();
 	digitalWrite(LED_PIN,LOW);
   Serial.begin(9600);
-  FSM::next_state = FSM::s_Done;
+  FSM::next_state = FSM::s_init;
   FSM::next();
 }
 
