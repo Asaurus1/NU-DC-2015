@@ -41,7 +41,7 @@ namespace st
 
 // Functions for bump sensing
 inline void startBumpCount() { st::previous_bumps = st::bumps; }
-inline int  bumpCount()	{ return st::bumps-st::previous_bumps; }
+inline int  bumpCount()	{ return st::bumps - st::previous_bumps; }
 
 // Functions for timing
 inline void startTimerDelay() { st::timer_prev = millis(); }
@@ -62,10 +62,10 @@ namespace FSM
 	void FSM_step();
 	void next();
 	void check_events();
-	void waitTime(int ms);
-	void waitBumps(int count);
-	void waitColor(int color);
-	void waitColorCount(int count);
+	bool waitTime(int ms);
+	bool waitBumps(int count, int timeout = 0);
+	bool waitColor(int color, int timeout = 0);
+	bool waitColorCount(int count);
 
 	// State Timers
 	  unsigned long previous_millis;

@@ -125,7 +125,7 @@ namespace DriveSystem
   void moveForwardNBlocks(int n)
   {
     moveForward(st::spd);
-    waitColorCount(n);
+    waitBumps(n);
     waitTime(500);
     moveBrake();
   }
@@ -133,7 +133,7 @@ namespace DriveSystem
   void moveReverseNBlocks(int n)
   {
     moveReverse(st::spd);
-    waitColorCount(n);
+    waitBumps(n);
     waitTime(500);
     moveBrake();
   }

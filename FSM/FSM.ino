@@ -66,6 +66,7 @@ namespace FSM {
 		    // Step 1
 		   	moveForwardNBlocks(3);
 		   	scoopUp();
+		   	waitTime(2500);
 		   	moveTurnRightAsPurple(90);
 		   	scoopDown();
 		   	moveReverse(255); // straighten on wall
@@ -76,6 +77,7 @@ namespace FSM {
 
 		   	//Step 3
 		   	scoopUp();
+		   	waitTime(2500);
 		   	moveTurnRightAsPurple(90);
 		   	scoopDown();
 		   	moveReverse(255); //straighten on wall
@@ -84,6 +86,7 @@ namespace FSM {
 		   	moveTurnRightAsPurple(90);
 		   	moveForwardNBlocks(1);
 		   	scoopUp();
+		   	waitTime(2500);
 		   	moveTurnLeftAsPurple(90);
 		   	scoopDown();
 
@@ -129,39 +132,49 @@ namespace FSM {
     }
 
 		/********************* FSM WaitFunctions *********************/
-		void waitTime(int ms)
+		bool waitTime(int ms)
 		{
 			 unsigned long start = millis();
 			 while (millis() <= start + ms)
 			 {
 			 		check_events();
 			 }
+			 return true;
 		}
 
-		void waitColor(int color)
+		bool waitColor(int color, int timeout)
 		{
-			 while (st::current_square_color != color)
-			 {
-			 		check_events();
-			 }
+			unsigned long start = millis();
+			while (st::current_square_color != color)
+			{
+			 	check_events();
+			 	if (timeout != 0 && millis() > start + timeout)
+			 		return false;
+			}
+			return true;
 		}
 
-		void waitColorCount(int count)
+		bool waitColorCount(int count)
 		{
 			 startColorCount();
-			 while (colorCount() <= count)
+			 while (colorCount() < count)
 			 {
 			 		check_events();
 			 }
+			 return true;
 		}
 
-		void waitBumps(int count)
+		bool waitBumps(int count, int timeout)
 		{
+			 unsigned long start = millis();
 			 startBumpCount();
-			 while (bumpCount() <= count)
+			 while (bumpCount() < count)
 			 {
 			 		check_events();
+			 		if (timeout != 0 && millis() > start + timeout)
+			 		return false;
 			 }
+			 return true;
 		}
 
 		/*********************** FSM Events ********************/
