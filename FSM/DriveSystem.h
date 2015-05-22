@@ -91,14 +91,14 @@ namespace DriveSystem
   /* ######################## HELPER FUNCTIONS ########################## */
 
   // Some functions to make mirroring easy
-  inline void moveTurnLeftAsPurple(byte spd) { 
+  inline void moveTurnLeftAsPurple() { 
     if (st::team_color == PURPLE) 
       moveTurnLeft(st::spd);
     else
       moveTurnRight(st::spd);
   }
 
-  inline void moveTurnRightAsPurple(byte spd) { 
+  inline void moveTurnRightAsPurple() { 
     if (st::team_color == PURPLE) 
       moveTurnRight(st::spd);
     else
@@ -107,14 +107,14 @@ namespace DriveSystem
 
   void moveTurnRight90AsPurple()
   {
-     moveTurnRightAsPurple(st::spd);
-     waitTime(1050);
+     moveTurnRightAsPurple();
+     waitTime(1050/2);
      moveBrake();
   }
-  void moveTurnLeft90Purple()
+  void moveTurnLeft90AsPurple()
   {
-    moveTurnLeftAsPurple(st::spd);
-    waitTime(1050);
+    moveTurnLeftAsPurple();
+    waitTime(1050/2);
     moveBrake();
   }
 
@@ -131,6 +131,14 @@ namespace DriveSystem
   {
     while (n-- > 0)
       moveForward1Block();
+  }
+
+  void moveForwardNBlocks_continuous(int n)
+  {
+    moveForward(st::spd);
+    waitBumps(n);
+    waitTime(500);
+    moveBrake();
   }
 
   void moveReverse1Block()

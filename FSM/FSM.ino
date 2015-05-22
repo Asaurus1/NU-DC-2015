@@ -57,9 +57,10 @@ namespace FSM {
 
 		void s_run()
 		{
-		    moveForward(st::spd);
-		    waitBumps(4);
-		    moveBrake();
+		    moveForwardNBlocks(4);
+		    moveTurnLeft90AsPurple();
+		    moveTurnLeft90AsPurple();
+		    moveForwardNBlocks_continuous(4);
 		    //ScoopDump();
 		    digitalWrite(LED_PIN,LOW);
 		    //waitTime(5000);
