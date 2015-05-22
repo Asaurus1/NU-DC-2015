@@ -1,6 +1,9 @@
 #ifndef DRIVESYSTEM_H
 #define DRIVESYSTEM_H
 #include <Arduino.h>
+#include "FSM.h"
+
+using namespace FSM;
 
 namespace DriveSystem
 {
@@ -82,25 +85,60 @@ namespace DriveSystem
     runMotor(motorL,motorL.dir,motorL.speed);
   }
   
-  // Orthagonal motion:
-  void moveTurnRight90()
+
+
+
+  /* ######################## HELPER FUNCTIONS ########################## */
+
+  // Some functions to make mirroring easy
+  inline void moveTurnLeftAsPurple(byte spd) { 
+    if (st::team_color == PURPLE) 
+      moveTurnLeft(st::spd);
+    else
+      moveTurnRight(st::spd);
+  }
+
+  inline void moveTurnRightAsPurple(byte spd) { 
+    if (st::team_color == PURPLE) 
+      moveTurnRight(st::spd);
+    else
+      moveTurnLeft(st::spd);
+  }
+
+  void moveTurnRight90AsPurple()
   {
-     moveTurnRight(255);
-     delay(1050);
+     moveTurnRightAsPurple(st::spd);
+     waitTime(1050);
      moveBrake();
   }
-  void moveTurnLeft90()
+  void moveTurnLeft90Purple()
   {
-    moveTurnLeft(255);
-    delay(1050);
+    moveTurnLeftAsPurple(st::spd);
+    waitTime(1050);
     moveBrake();
   }
+
+  //Move forward block backwards by squares
   void moveForward1Block()
   {
-    moveForward(255);
-    delay(2500);
+    moveForward(st::spd);
+    waitBumps(1);
+    waitTime(500);
     moveBrake();
-    
+  }
+
+  void moveForwardNBlocks(int n)
+  {
+    while (n-- > 0)
+      moveForward1Block();
+  }
+
+  void moveReverse1Block()
+  {
+    moveReverse(st::spd);
+    waitBumps(1);
+    waitTime(500);
+    moveBrake();
   }
 }
 #endif

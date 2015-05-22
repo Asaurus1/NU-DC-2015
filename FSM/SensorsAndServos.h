@@ -3,6 +3,9 @@
 #include <Arduino.h>
 #include "BumpSensor.h"
 #include <Servo.h>
+#include "FSM.h"
+
+#define COLOR_SENSOR_ARRAY_SIZE 10
 
 #define COLORSENSE_PIN A1 
 #define SWEEPSENSE_PIN A4
@@ -15,11 +18,6 @@
 #define SCOOPSERVO_PIN 2
 #define BRUSHMOTORS_PIN 1
 
-// Define some colors, just for the hell of it
-#define WHITE 0
-#define PURPLE 1
-#define BLACK 2
-
 //Peripherals
 BumpSensor tableBump(BUMPSENSOR_PIN);
 Servo SweepServo;
@@ -28,22 +26,22 @@ Servo DropServo;
 
 void scoopDown() 
 {
-  ScoopServo.write(13);
-  delay(2000);
+  ScoopServo.attach(SCOOPSERVO_PIN);
+  ScoopServo.write(180);
+  delay(700);
   ScoopServo.detach();
 }
 
 void scoopUp()
 {
   ScoopServo.attach(SCOOPSERVO_PIN);
-  ScoopServo.write(160);
-  delay(2000);
+  ScoopServo.write(0);
 }
 
 void ServoSensorSetup()
 {
   //DropServo.attach(13);
-  SweepServo.attach(3);
+  SweepServo.attach(SWEEPSERVO_PIN);
   pinMode(LED_PIN, OUTPUT);
   pinMode(TEAMSWITCH_PIN, INPUT);
   pinMode(STARTBUTTON_PIN, INPUT);
@@ -59,12 +57,9 @@ void ScoopServoWrite(int angle)
 
 void ScoopDump()
 {
-  ScoopServo.attach(SCOOPSERVO_PIN);
-  ScoopServo.write(0);
+  scoopUp();
   delay(3000);
-  ScoopServo.write(180);
-  delay(200);
-  ScoopServo.detach();
+  scoopDown();
 }
 
 void ScoopServoOff()
@@ -76,12 +71,11 @@ inline int ReadStartButton()
 {
   int val=digitalRead(STARTBUTTON_PIN);
   return val;
-  
 }
 
-int CSA[COLOR_SENSOR_ARRAY_SIZE];
+int CSA[COLOR_SENSOR_ARRAY_SIZE] = {};
 int CSAIndex = 0;
-int CSAvg = 60;
+int CSAvg = 0;
 
 int ReadColor(int ColorThresh)
 {
@@ -90,9 +84,10 @@ int ReadColor(int ColorThresh)
 
   CSAvg -= CSA[CSAIndex]/COLOR_SENSOR_ARRAY_SIZE;
   CSAvg += val/COLOR_SENSOR_ARRAY_SIZE;
+  CSA[CSAIndex] = val;
   CSAIndex = (CSAIndex + 1) % COLOR_SENSOR_ARRAY_SIZE;
 
-  if (CSAvg > COlorThresh)
+  if (CSAvg > ColorThresh)
     return WHITE;
   else
     return PURPLE;  
