@@ -167,21 +167,22 @@ namespace FSM {
      		st::last_color_read_time = now;
 				st::previous_square_color = st::current_square_color;
 	      st::current_square_color = ReadColor(st::color_threshold);
+	      Serial.print("COLOR "); Serial.print(st::current_square_color ? "P" : "W");
 	      delay(5);
 
       	if (st::current_square_color != st::previous_square_color) // Double check
       		st::colorchanges++;
 
-      	digitalWrite(LED_PIN,!st::current_square_color); // Write color for debug purposes
+      	digitalWrite(LED_PIN,!st::current_square_color); // Write color for debug purpose
     	}
 
     	/* Bump count */
-    	tableBump.poll();
+      tableBump.poll();
     	if (tableBump.pressed())
     	{
     		st::bumps++;
     	}
-
+    	
 		  /* Game Timers */
 		  if (game_time() > GAME_END_TIME)
 		  {
@@ -224,8 +225,7 @@ void setup()
 	ServoSensorSetup();
 	digitalWrite(LED_PIN,LOW);
   Serial.begin(9600);
-  delay(5000);
-  FSM::next_state = FSM::s_init;
+  FSM::next_state = FSM::s_Done;
   FSM::next();
 }
 
