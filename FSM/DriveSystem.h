@@ -86,19 +86,19 @@ namespace DriveSystem
   void moveTurnRight90()
   {
      moveTurnRight(255);
-     delay(1050);
+     delay(500);
      moveBrake();
   }
   void moveTurnLeft90()
   {
     moveTurnLeft(255);
-    delay(1050);
+    delay(500);
     moveBrake();
   }
   void moveForward1Block()
   {
     moveForward(255);
-    delay(2500);
+    delay(1300);
     moveBrake();
     
   }

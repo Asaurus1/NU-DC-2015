@@ -55,9 +55,14 @@ namespace FSM {
 		void s_init()
                 {
                       digitalWrite(BRUSHMOTORS_PIN, HIGH);
-                      const int tolerance = 80;
+                      const int tolerance = 100;
                       Our_Color = digitalRead(TEAMSWITCH_PIN);
-                      int val = analogRead(COLORSENSE_PIN);
+                      int val1 = analogRead(COLORSENSE_PIN);
+                      delay(5);
+                      int val2 = analogRead(COLORSENSE_PIN);
+                      delay(5);
+                      int val3 = analogRead(COLORSENSE_PIN);
+                      int val=(val1+val2+val3)/3;
                       if (Our_Color==0) //White, thus we're on purple
                         {
                           Global_Color_Thresh=val+tolerance;
@@ -89,20 +94,44 @@ namespace FSM {
                       
                       digitalWrite(LED_PIN, LOW);
                       
-	              next_state = s_Done;
+	              next_state = s_run;
 		      next();
 		}
 
 		void s_run()
 		{
+                      moveForward1Block();
+                      moveForward1Block();
+                      moveForward1Block();
+                      ScoopDump();
+                      delay(750);
+                      moveForward1Block();
+                      moveForward1Block();
+                      moveForward1Block();
+                      ScoopDump();
+                      delay(750);
                       moveForward(255);
-                      delay(6000);
+                      delay(3500); // was 5000
+                      ////
+                      moveReverse(100);
+                      delay(350);
+                      moveTurnLeft(100);
+                      delay(450);
+                      moveForward(255);
+                      delay(3500);
+                      ////
+                      
+                      moveReverse(100);
+                      delay(450);
                       moveBrake();
                       ScoopDump();
-                      delay(5000);
-                      next_state = s_gameEnd;
+                      DropServo.attach(13);
+                      DropServo.write(180);
+                      delay(200);
+                      DropServo.detach();
+                      next_state=s_Done;
                       next();
-  
+                      
 //                      ScoopDump();
 //                      while(!digitalRead(STARTBUTTON_PIN))
 //                      {
@@ -190,8 +219,6 @@ namespace FSM {
                     delay(250);
                     moveBrake();
                     delay(250);
-                    ScoopServo.attach(2);
-                    ScoopServoWrite(40);
                     DropServo.attach(13);
                     DropServo.write(180);
                     delay(200);
@@ -199,7 +226,6 @@ namespace FSM {
                     moveForward(100);
                     delay(2000);
                     moveBrake();
-                    ScoopServo.detach();
                     
                     next_state=s_Done;
                     next();
@@ -207,8 +233,6 @@ namespace FSM {
                 void s_Done() // also functions as a color-sensing loop, if you just need to check colors
                 {
                   moveBrake();
-                  next_state=s_Done;
-                  next();
                   
                   
                 }
@@ -230,11 +254,10 @@ namespace FSM {
       		  {
                         digitalWrite(LED_PIN, HIGH);
       		  	next_state = s_gameEnd; //Search for a place to drop
-      		  	next();  
+      		  	//next();  
                   }
 		}
 }
-
 
 /************************* Main Code ****************************/
 

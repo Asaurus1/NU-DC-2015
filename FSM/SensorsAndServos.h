@@ -43,7 +43,7 @@ void ScoopDump()
 {
   ScoopServo.attach(SCOOPSERVO_PIN);
   ScoopServo.write(0);
-  delay(2500);
+  delay(3000);
   ScoopServo.write(180);
   delay(200);
   ScoopServo.detach();
@@ -63,15 +63,32 @@ inline int ReadStartButton()
 
 int ReadColor(int ColorThresh)
 {
-  int color;
-  int val = analogRead(COLORSENSE_PIN);
-  if (val>ColorThresh){
-    color = 0; // white
+  while(1)
+  {
+    int color;
+    int val = analogRead(COLORSENSE_PIN);
+    if (val>ColorThresh){
+      color = 0; // white
+    }
+    else {
+      color = 1; //purple
+    }
+    delay(100);
+    int color2;
+    val = analogRead(COLORSENSE_PIN);
+    if (val>ColorThresh){
+      color2 = 0; // white
+    }
+    else {
+      color2 = 1; //purple
+    }
+    
+    if (color==color2)
+    {
+    return color;
+    break;
+    }
   }
-  else {
-    color = 1; //purple
-  }
-  return color;
   
 }
 
