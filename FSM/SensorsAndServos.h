@@ -7,22 +7,35 @@
 
 #define COLOR_SENSOR_ARRAY_SIZE 10
 
-#define COLORSENSE_PIN A1 
-#define SWEEPSENSE_PIN A4
+#define COLORSENSE_PIN A1
 #define TEAMSWITCH_PIN 18
-#define SWEEPSERVO_PIN 3
 #define DROPSERVO_PIN 13
 #define LED_PIN 14
 #define STARTBUTTON_PIN 12
 #define BUMPSENSOR_PIN 17
 #define SCOOPSERVO_PIN 2
 #define BRUSHMOTORS_PIN 1
+#define FRONTBUMP_PIN 10
+#define CANDYCANE_ENABLE 1
+#define CANDYCANE_PHASE 3
+
+#define CANDYCANE_FWD 0
 
 //Peripherals
 BumpSensor tableBump(BUMPSENSOR_PIN);
-Servo SweepServo;
 Servo ScoopServo;
 Servo DropServo;
+
+void candyCanesOn(int dir)
+{
+  digitalWrite(CANDYCANE_PHASE, dir);
+  analogWrite(CANDYCANE_ENABLE, 255);
+}
+
+void candyCanesOff()
+{
+  analogWrite(CANDYCANE_ENABLE, 0);
+}
 
 void scoopDown() 
 {
@@ -30,41 +43,34 @@ void scoopDown()
   ScoopServo.write(180);
   delay(700);
   ScoopServo.detach();
+  candyCanesOn(CANDYCANE_FWD); //Run forwards
 }
 
 void scoopUp()
 {
+  candyCanesOff();
   ScoopServo.attach(SCOOPSERVO_PIN);
   ScoopServo.write(0);
 }
 
-void ServoSensorSetup()
-{
-  //DropServo.attach(13);
-  SweepServo.attach(SWEEPSERVO_PIN);
-  pinMode(LED_PIN, OUTPUT);
-  pinMode(TEAMSWITCH_PIN, INPUT);
-  pinMode(STARTBUTTON_PIN, INPUT);
-  pinMode(BRUSHMOTORS_PIN, OUTPUT);
-  pinMode(BUMPSENSOR_PIN, INPUT);
-}
-
-void ScoopServoWrite(int angle)
-{
-  ScoopServo.attach(SCOOPSERVO_PIN);
-  ScoopServo.write(angle);
-}
-
-void ScoopDump()
+void scoopDump()
 {
   scoopUp();
   delay(3000);
   scoopDown();
 }
 
-void ScoopServoOff()
+void ServoSensorSetup()
 {
-  ScoopServo.detach();
+  //DropServo.attach(13);
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(TEAMSWITCH_PIN, INPUT);
+  pinMode(STARTBUTTON_PIN, INPUT);
+  pinMode(BRUSHMOTORS_PIN, OUTPUT);
+  pinMode(BUMPSENSOR_PIN, INPUT);
+  pinMode(FRONTBUMP_PIN, INPUT);
+  pinMode(CANDYCANE_PHASE, OUTPUT);
+  candyCanesOff();
 }
 
 inline int ReadStartButton()

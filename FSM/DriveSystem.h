@@ -5,7 +5,7 @@
 
 using namespace FSM;
 
-int TURN_TIME_180 = 1050;
+int TURN_TIME_180 = 1850; // original:1050
 
 namespace DriveSystem
 {
@@ -125,16 +125,16 @@ namespace DriveSystem
   void moveForwardNBlocks(int n)
   {
     moveForward(st::spd);
-    waitBumps(n);
-    waitTime(500);
+    waitBumps(n,8000*n);
+    waitTime(600);
     moveBrake();
   }
 
   void moveReverseNBlocks(int n)
   {
     moveReverse(st::spd);
-    waitBumps(n);
-    waitTime(500);
+    waitBumps(n,8000*n);
+    waitTime(600);
     moveBrake();
   }
 }
