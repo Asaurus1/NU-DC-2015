@@ -23,6 +23,7 @@
 
 //Peripherals
 BumpSensor tableBump(BUMPSENSOR_PIN);
+BumpSensor frontBump(FRONTBUMP_PIN);
 Servo ScoopServo;
 Servo DropServo;
 

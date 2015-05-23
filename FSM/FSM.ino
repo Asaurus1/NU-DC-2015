@@ -58,10 +58,6 @@ namespace FSM {
 
 		void s_run()
 		{
-		    /*moveForwardNBlocks(4);
-		    moveTurnLeft90AsPurple();
-		    moveTurnLeft90AsPurple();
-		    moveForwardNBlocks_continuous(4);*/
 
 		    // Step 1
 		   	moveForwardNBlocks(3);
@@ -89,10 +85,12 @@ namespace FSM {
 		   	waitTime(2500);
 		   	moveTurnLeftAsPurple(90);
 		   	scoopDown();
+		   	waitTime(500);
 
 		   	// Step 4
 		   	moveForwardNBlocks(2);
-		   	ScoopDump();
+		   	scoopDump();
+		   	waitTime(500);
 
 		   	// Step 5
 		   	moveForwardNBlocks(2);
@@ -203,6 +201,17 @@ namespace FSM {
     	{
     		st::bumps++;
     	}
+    	/*frontBump.poll();
+    	if (frontBump.pressed());
+    	{
+    		lastFrontBumpTime = millis();
+    	}
+    	if (frontBump.on())
+    	{
+    		if (millis() > lastFrontBumpTime + 1000)
+    			moveReverse(255);
+
+    	}*/
 
 		  /* Game Timers */
 		  if (game_time() > GAME_END_TIME)

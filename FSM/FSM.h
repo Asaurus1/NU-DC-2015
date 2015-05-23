@@ -28,6 +28,7 @@ namespace st
   int bumps = 0;
   int previous_bumps = 0;
   int bumpSensorColorSenseDelay = 0;
+  unsigned long lastFrontBumpTime = 0;
 
   //color counters 
   int colorchanges = 0;
