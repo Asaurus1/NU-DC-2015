@@ -90,6 +90,7 @@ namespace FSM {
     waitTime(2500);
     moveTurnLeftAsPurple(90);
     scoopDown();
+	waitTime(500);
 
     // Step 4
     moveForward(255);
